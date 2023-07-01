@@ -13,7 +13,7 @@ import java.util.HashMap;
 @RestController
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
-    static final LocalDate FILM_DATE = LocalDate.of(1985, 12, 28);
+    private final LocalDate dFILM_DATE = LocalDate.of(1985, 12, 28);
 
     @GetMapping("/films")
     public HashMap<Integer, Film> getFilms() {
@@ -23,7 +23,7 @@ public class FilmController {
 
     @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
-        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(FILM_DATE)
+        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(dFILM_DATE)
                 || film.getDescription().length() > 200 || film.getName().isEmpty()) {
             throw new ValidationException("Incorrect data");
         } else {
@@ -38,7 +38,7 @@ public class FilmController {
 
     @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) {
-        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(FILM_DATE)
+        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(dFILM_DATE)
                 || film.getDescription().length() > 200) {
             throw new ValidationException("Incorrect data");
         }
