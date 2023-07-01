@@ -1,13 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.time.LocalDate;
 
@@ -24,12 +20,4 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private long duration;
-
-    public void setReleaseDate(LocalDate releaseDate, LocalDate checkDate) {
-        if (releaseDate.isBefore(checkDate)) {
-            throw new ValidationException("Incorrect data");
-        } else {
-            this.releaseDate = releaseDate;
-        }
-    }
 }
