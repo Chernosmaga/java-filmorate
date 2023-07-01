@@ -53,4 +53,5 @@ public class UserController {
         log.info("'{}' info with id '{}' was updated", user.getLogin(), user.getId());
         return user;
     }
+
 }
