@@ -13,7 +13,7 @@ import java.util.HashMap;
 @RestController
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
-    private final LocalDate FILM_DATE = LocalDate.of(1985, 12, 28);
+    static final LocalDate FILM_DATE = LocalDate.of(1985, 12, 28);
 
     @GetMapping("/films")
     public HashMap<Integer, Film> getFilms() {
