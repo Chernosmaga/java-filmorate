@@ -8,6 +8,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 @SpringBootTest
 public class UserControllerTest {
@@ -33,17 +36,18 @@ public class UserControllerTest {
     @Test
     void update_shouldUpdateUserData() {
         User thisUser = new User(1, "mail@yandex.ru", "user", "User",
-                LocalDate.of(1990, 1, 1));
+                LocalDate.of(1976, 9, 20));
         controller.create(user);
         controller.update(thisUser);
 
         Assertions.assertEquals("mail@yandex.ru", thisUser.getEmail());
+        Assertions.assertEquals(user.getId(), thisUser.getId());
         Assertions.assertEquals(1, controller.getUsers().size());
     }
 
     @Test
-    void create_shouldCreateAUserIfIdAndNameAreEmpty() {
-        User thisUser = new User(0, "mail@yandex.ru", "user", null,
+    void create_shouldCreateAUserIfNameIsEmpty() {
+        User thisUser = new User(1, "mail@yandex.ru", "user", null,
                 LocalDate.of(1990, 1, 1));
         controller.create(thisUser);
 
@@ -82,4 +86,5 @@ public class UserControllerTest {
         Assertions.assertThrows(ValidationException.class, () -> controller.create(user));
         Assertions.assertEquals(0, controller.getUsers().size());
     }
+
 }

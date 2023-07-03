@@ -74,4 +74,5 @@ public class FilmControllerTest {
         Assertions.assertThrows(ValidationException.class, () -> controller.create(film));
         Assertions.assertEquals(0, controller.getFilms().size());
     }
+
 }

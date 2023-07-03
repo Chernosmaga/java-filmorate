@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,7 @@ import java.util.HashMap;
 @RestController
 public class UserController {
     private final HashMap<Integer, User> users = new HashMap<>();
-
-    @ResponseBody
-    @GetMapping
-    public Collection<User> getUsers() {
-        log.info("The number of users is '{}'", users.size());
-        return users.values();
-    }
+    private int id = 0;
 
     @ResponseBody
     @PostMapping
@@ -34,12 +30,19 @@ public class UserController {
                 user.setName(user.getLogin());
             }
             if (user.getId() == 0) {
-                user.setId(1);
+                user.setId(++id);
             }
             users.put(user.getId(), user);
-            log.info("The user '{}' is saved with the identifier '{}'.", user.getEmail(), user.getId());
+            log.info("The user '{}' is saved with the identifier is '{}'.", user.getEmail(), user.getId());
         }
         return user;
+    }
+
+    @ResponseBody
+    @GetMapping
+    public Collection<User> getUsers() {
+        log.info("The number of users is '{}'", users.size());
+        return users.values();
     }
 
     @ResponseBody
@@ -49,8 +52,12 @@ public class UserController {
                 || user.getLogin().isBlank() || user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Incorrect data");
         }
-        users.put(user.getId(), user);
-        log.info("'{}' info with id '{}' was updated", user.getLogin(), user.getId());
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
+            log.info("'{}' info with id '{}' was updated", user.getLogin(), user.getId());
+        } else {
+            throw new ValidationException("There is no such user");
+        }
         return user;
     }
 
