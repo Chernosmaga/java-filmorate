@@ -9,8 +9,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @RequestMapping("/users")
@@ -40,9 +42,9 @@ public class UserController {
 
     @ResponseBody
     @GetMapping
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         log.info("The number of users is '{}'", users.size());
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
     @ResponseBody
@@ -50,13 +52,13 @@ public class UserController {
     public User update(@Valid @RequestBody User user) {
         if (user.getEmail().isEmpty() || user.getEmail().isBlank() || user.getLogin().isEmpty()
                 || user.getLogin().isBlank() || user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Incorrect data");
+            throw new ValidationException("Incorrect user data");
         }
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info("'{}' info with id '{}' was updated", user.getLogin(), user.getId());
         } else {
-            throw new ValidationException("There is no such user");
+            throw new ValidationException("Attempt to update non-existing user");
         }
         return user;
     }
