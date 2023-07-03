@@ -15,14 +15,13 @@ import java.util.List;
 @RestController
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
-    private final LocalDate FILM_DATE = LocalDate.of(1895, 12, 28);
     private int id = 0;
 
     @ResponseBody
     @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
         if (film.getDuration() <= 0
-                || film.getReleaseDate().isBefore(FILM_DATE)
+                || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))
                 || film.getDescription().length() > 200 || film.getName().isEmpty()) {
             throw new ValidationException("Incorrect data");
         } else {
@@ -45,7 +44,7 @@ public class FilmController {
     @ResponseBody
     @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) {
-        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(FILM_DATE)
+        if (film.getDuration() <= 0 || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))
                 || film.getDescription().length() > 200) {
             throw new ValidationException("Incorrect movie data");
         }
