@@ -21,42 +21,49 @@ public class UserController {
     @ResponseBody
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (!user.getEmail().contains("@") || user.getBirthday().isAfter(LocalDate.now())
-                || user.getLogin().isBlank() || user.getLogin().isEmpty()) {
-            throw new ValidationException("Incorrect data");
-        } else {
-            if (user.getName() == null) {
-                user.setName(user.getLogin());
-            }
-            if (user.getId() == 0) {
-                user.setId(++id);
-            }
-            users.put(user.getId(), user);
-            log.info("The user '{}' is saved with the identifier is '{}'.", user.getEmail(), user.getId());
-        }
+        userValidation(user);
+        users.put(user.getId(), user);
+        log.info("The user '{}' has been saved with the identifier '{}'", user.getEmail(), user.getId());
         return user;
     }
 
     @ResponseBody
     @GetMapping
     public List<User> getUsers() {
-        log.info("The number of users is '{}'", users.size());
+        log.info("The number of users: '{}'", users.size());
         return new ArrayList<>(users.values());
     }
 
     @ResponseBody
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || user.getLogin().isEmpty()
-                || user.getLogin().isBlank() || user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Incorrect user data");
-        }
+        userValidation(user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
-            log.info("'{}' info with id '{}' was updated", user.getLogin(), user.getId());
+            log.info("'{}' info with identifier '{}' was updated", user.getLogin(), user.getId());
         } else {
             throw new ValidationException("Attempt to update non-existing user");
         }
         return user;
+    }
+
+    private void userValidation(User user) {
+        if (user.getBirthday().isAfter(LocalDate.now()) || user.getBirthday() == null) {
+            throw new ValidationException("Incorrect user's birthday with identifier '" + user.getId() + "'");
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Incorrect user's email with identifier '" + user.getId() + "'");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("User's name with identifier '{}' was set as '{}'", user.getId(), user.getName());
+        }
+        if (user.getId() == 0 || user.getId() < 0) {
+            user.setId(++id);
+            log.info("Incorrect user identifier was set as '{}'", user.getId());
+        }
+        if (user.getLogin().isBlank() || user.getLogin().isEmpty()) {
+            throw new ValidationException("Incorrect login with user's identifier '" + user.getId() + "'");
+        }
     }
 }
