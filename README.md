@@ -133,8 +133,8 @@ public createUser(@Valid @RequestBody User user)
 
 </details>
 
-### Количество итераций: 
-### Количество замечаний:
+### Количество итераций: 3
+### Количество замечаний: 6
 
 <details>
 <summary>Техническое задание 10-го спринта</summary>
