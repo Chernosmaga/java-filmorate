@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.EntityValidation;
 
 import java.util.Map;
-import java.util.Random;
 
 @Slf4j
 @Component
