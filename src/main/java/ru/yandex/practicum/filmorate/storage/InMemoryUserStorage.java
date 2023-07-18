@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.EntityValidation;
+import ru.yandex.practicum.filmorate.validation.UserValidation;
 
 import java.util.Map;
 
@@ -15,11 +15,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users;
-    private final EntityValidation entityValidation;
+    private final UserValidation validation;
 
     @Override
     public void createUser(User user) {
-        entityValidation.validate(user);
+        validation.validate(user);
         users.put(user.getId(), user);
         log.info("The user '{}' has been saved with the identifier '{}'", user.getEmail(), user.getId());
     }
@@ -27,7 +27,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void updateUser(User user) {
         if (users.containsKey(user.getId())) {
-            entityValidation.validate(user);
+            validation.validate(user);
             users.put(user.getId(), user);
             log.info("'{}' info with identifier '{}' was updated", user.getLogin(), user.getId());
         } else {

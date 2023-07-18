@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.EntityValidation;
+import ru.yandex.practicum.filmorate.validation.FilmValidation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,11 +16,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Long, Film> films;
-    private final EntityValidation entityValidation;
+    private final FilmValidation validation;
 
     @Override
     public void createFilm(Film film) {
-        entityValidation.validate(film);
+        validation.validate(film);
         films.put(film.getId(), film);
         log.info("'{}' movie was added to a library, the identifier is '{}'", film.getName(), film.getId());
     }
@@ -28,6 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
+            validation.validate(film);
             films.put(film.getId(), film);
             log.info("'{}' movie was updated in a library, the identifier is '{}'", film.getName(), film.getId());
         } else {
