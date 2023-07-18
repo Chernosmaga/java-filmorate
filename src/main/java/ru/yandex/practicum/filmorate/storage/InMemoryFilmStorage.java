@@ -6,21 +6,20 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.validation.FilmValidation;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
-    private final HashMap<Long, Film> films;
-    private final FilmValidation validation;
+    private final Map<Long, Film> films;
 
     @Override
     public void createFilm(Film film) {
-        validation.validate(film);
+        validate(film);
         films.put(film.getId(), film);
         log.info("'{}' movie was added to a library, the identifier is '{}'", film.getName(), film.getId());
     }
@@ -28,7 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
-            validation.validate(film);
+            validate(film);
             films.put(film.getId(), film);
             log.info("'{}' movie was updated in a library, the identifier is '{}'", film.getName(), film.getId());
         } else {
@@ -55,5 +54,28 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Map<Long, Film> getFilms() {
         log.info("There are '{}' movies in a library now", films.size());
         return films;
+    }
+
+    private void validate(Film film) {
+        if (film.getReleaseDate() == null ||
+                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Incorrect release date");
+        }
+        if (film.getName().isEmpty() || film.getName().isBlank()) {
+            throw new ValidationException("Attempt to set an empty movie name");
+        }
+        if (film.getDuration() <= 0) {
+            throw new ValidationException("Attempt to set duration less than zero");
+        }
+        if (film.getDescription().length() > 200 || film.getDescription().length() == 0) {
+            throw new ValidationException("Description increases 200 symbols or empty");
+        }
+        if (film.getId() == null || film.getId() < 0) {
+            film.setId(1L);
+            log.info("Movie identifier was set as '{}", film.getId());
+        }
+        if (film.getLikes() == null) {
+            film.setLikes(new HashSet<>());
+        }
     }
 }
