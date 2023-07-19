@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -21,18 +20,18 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public void createUser(@Valid @RequestBody User user) {
-        userStorage.createUser(user);
+    public User createUser(@Valid @RequestBody User user) {
+        return userStorage.createUser(user);
     }
 
     @GetMapping
-    public Map<Long, User> getUsers() {
+    public List<User> getUsers() {
         return userStorage.getUsers();
     }
 
     @PutMapping
-    public void updateUser(@Valid @RequestBody User user) {
-        userStorage.updateUser(user);
+    public User updateUser(@Valid @RequestBody User user) {
+        return userStorage.updateUser(user);
     }
 
     @GetMapping("/{id}")
@@ -41,22 +40,22 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.addFriend(userId, friendId);
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.deleteFriend(userId, friendId);
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable Long userId) {
-        return userService.getFriends(userId);
+    public List<User> getFriends(@PathVariable Long id) {
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable Long userId, @PathVariable Long friendId) {
-        return userService.getCommonFriends(userId, friendId);
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }

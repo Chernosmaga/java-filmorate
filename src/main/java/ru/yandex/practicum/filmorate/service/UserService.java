@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NoCommonFriendsException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -45,8 +44,7 @@ public class UserService {
                     .filter(friendFriends::contains)
                     .map(this::getUserById).collect(Collectors.toList());
         } else {
-            throw new NoCommonFriendsException("No common friend were found" +
-                    "for user with the identifier '" + userId + "' with user with id '" + friendId + "'");
+            return new ArrayList<>();
         }
     }
 
@@ -62,7 +60,7 @@ public class UserService {
     }
 
     private User getUserById(Long userId) {
-        User user = userStorage.getUsers().getOrDefault(userId, null);
+        User user = userStorage.getUserById(userId);
         if (user == null) {
             throw new ObjectNotFoundException("Attempt to reach non-existing user with id '" + userId + "'");
         } else {

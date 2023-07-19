@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -8,30 +7,36 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films;
+    private Long id;
 
-    @Override
-    public void createFilm(Film film) {
-        validate(film);
-        films.put(film.getId(), film);
-        log.info("'{}' movie was added to a library, the identifier is '{}'", film.getName(), film.getId());
+    public InMemoryFilmStorage() {
+        films = new HashMap<>();
+        id = 0L;
     }
 
     @Override
-    public void updateFilm(Film film) {
+    public Film createFilm(Film film) {
+        validate(film);
+        films.put(film.getId(), film);
+        log.info("'{}' movie was added to a library, the identifier is '{}'", film.getName(), film.getId());
+        return film;
+    }
+
+    @Override
+    public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
             validate(film);
             films.put(film.getId(), film);
             log.info("'{}' movie was updated in a library, the identifier is '{}'", film.getName(), film.getId());
+            return film;
         } else {
-            throw new ValidationException("Attempt to update non-existing movie");
+            throw new ObjectNotFoundException("Attempt to update non-existing movie");
         }
     }
 
@@ -51,9 +56,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Map<Long, Film> getFilms() {
+    public List<Film> getFilms() {
         log.info("There are '{}' movies in a library now", films.size());
-        return films;
+        return new ArrayList<>(films.values());
     }
 
     private void validate(Film film) {
@@ -70,8 +75,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (film.getDescription().length() > 200 || film.getDescription().length() == 0) {
             throw new ValidationException("Description increases 200 symbols or empty");
         }
-        if (film.getId() == null || film.getId() < 0) {
-            film.setId(1L);
+        if (film.getId() == null || film.getId() <= 0) {
+            film.setId(++id);
             log.info("Movie identifier was set as '{}", film.getId());
         }
         if (film.getLikes() == null) {
