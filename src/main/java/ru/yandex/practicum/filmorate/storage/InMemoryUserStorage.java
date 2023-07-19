@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
-@Component("inMemoryUserStorage")
+@Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users;
     private Long id;
@@ -48,11 +48,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Long id) {
-        if (users.containsKey(id)) {
-            return users.get(id);
-        } else {
+        if (!users.containsKey(id)) {
             throw new ObjectNotFoundException("Attempt to reach non-existing user with id '" + id + "'");
         }
+        return users.get(id);
     }
 
     @Override

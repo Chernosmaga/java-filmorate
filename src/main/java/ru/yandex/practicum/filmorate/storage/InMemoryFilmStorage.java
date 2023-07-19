@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
-@Component("inMemoryFilmStorage")
+@Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films;
     private Long id;
@@ -48,11 +48,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Long id) {
-        if (films.containsKey(id)) {
-            return films.get(id);
-        } else {
+        if (!films.containsKey(id)) {
             throw new ObjectNotFoundException("Attempt to reach non-existing movie with id '" + id + "'");
         }
+        return films.get(id);
     }
 
     @Override
