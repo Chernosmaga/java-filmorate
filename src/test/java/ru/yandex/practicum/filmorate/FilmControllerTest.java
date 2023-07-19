@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,14 +19,12 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-@SpringBootTest(classes = {FilmController.class, InMemoryFilmStorage.class, FilmService.class, InMemoryUserStorage.class})
+@SpringBootTest(classes = {FilmController.class, InMemoryFilmStorage.class, InMemoryUserStorage.class})
 public class FilmControllerTest {
     @Autowired
     private FilmController controller;
     @Autowired
     private FilmStorage storage;
-    @Autowired
-    private FilmService service;
     @Autowired
     private UserStorage userStorage;
     private final Film film = new Film(1L, "Movie", "The most awesome movie I've ever seen",
@@ -127,7 +124,7 @@ public class FilmControllerTest {
         userStorage.createUser(user);
         controller.createFilm(film);
         controller.likeAMovie(film.getId(), user.getId());
-        List<Film> popularMoviesList = service.getPopularMovies(1);
+        List<Film> popularMoviesList = controller.getPopularMovies(1);
 
         Assertions.assertEquals(1, popularMoviesList.size());
     }
