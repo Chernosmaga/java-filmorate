@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,14 +13,10 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-@SpringBootTest(classes = {UserController.class, UserService.class, InMemoryUserStorage.class})
 public class UserControllerTest {
-    @Autowired
-    private UserController controller;
-    @Autowired
-    private UserService service;
-    @Autowired
-    private InMemoryUserStorage storage;
+    private InMemoryUserStorage storage = new InMemoryUserStorage();
+    private UserService service = new UserService(storage);
+    private UserController controller = new UserController(storage, service);
     private final User user = new User(1L, "lollipop@yandex.ru", "scramble", "Matthew",
             LocalDate.of(1990, 1, 1), new HashSet<>());
     private final User updatedUser = new User(1L, "yandex@yandex.ru", "scramble", "Matthew",
