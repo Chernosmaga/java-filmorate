@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,12 +13,14 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-@SpringBootTest(classes = {FilmController.class, InMemoryFilmStorage.class, FilmService.class})
+@SpringBootTest(classes = {FilmController.class, InMemoryFilmStorage.class, FilmService.class, InMemoryUserStorage.class})
 public class FilmControllerTest {
     @Autowired
     private FilmController controller;
@@ -25,6 +28,8 @@ public class FilmControllerTest {
     private FilmStorage storage;
     @Autowired
     private FilmService service;
+    @Autowired
+    private UserStorage userStorage;
     private final Film film = new Film(1L, "Movie", "The most awesome movie I've ever seen",
             LocalDate.of(2020, 2, 2), 120, new HashSet<>());
     private final Film updatedFilm = new Film(1L, "Movie",
@@ -100,6 +105,7 @@ public class FilmControllerTest {
 
     @Test
     void likeAMovie_shouldAddALikeToAMovie() {
+        userStorage.createUser(user);
         controller.createFilm(film);
         controller.likeAMovie(film.getId(), user.getId());
 
@@ -108,6 +114,7 @@ public class FilmControllerTest {
 
     @Test
     void removeLike_shouldRemoveLikeFromAMovie() {
+        userStorage.createUser(user);
         controller.createFilm(film);
         controller.likeAMovie(film.getId(), user.getId());
         controller.removeLike(film.getId(), user.getId());
@@ -117,6 +124,7 @@ public class FilmControllerTest {
 
     @Test
     void getPopularMovies_shouldReturnListOfPopularMovies() {
+        userStorage.createUser(user);
         controller.createFilm(film);
         controller.likeAMovie(film.getId(), user.getId());
         List<Film> popularMoviesList = service.getPopularMovies(1);
