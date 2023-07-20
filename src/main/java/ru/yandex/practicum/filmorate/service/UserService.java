@@ -58,4 +58,8 @@ public class UserService {
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
     }
+
+    public UserStorage getUserStorage() {
+        return userStorage;
+    }
 }

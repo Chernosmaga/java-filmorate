@@ -3,9 +3,9 @@ package ru.yandex.practicum.filmorate.exception;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class OtherException extends RuntimeException {
+public class InternalServiceException extends RuntimeException {
 
-    public OtherException(final String message) {
+    public InternalServiceException(final String message) {
         super(message);
         log.error(message);
     }

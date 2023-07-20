@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
@@ -17,11 +16,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
      private final FilmStorage filmStorage;
-     private final UserStorage userStorage;
+     private final UserService userService;
 
     public void like(Long filmId, Long userId) {
          Film film = filmStorage.getFilmById(filmId);
-         userStorage.getUserById(userId);
+         userService.getUserStorage().getUserById(userId);
          if (film == null) {
              throw new ObjectNotFoundException("Attempt to reach non-existing movie with id '" + filmId + "'");
          }
@@ -31,7 +30,7 @@ public class FilmService {
 
      public void dislike(Long filmId, Long userId) {
          Film film = filmStorage.getFilmById(filmId);
-         userStorage.getUserById(userId);
+         userService.getUserStorage().getUserById(userId);
          if (film == null) {
              throw new ObjectNotFoundException("Attempt to reach non-existing movie with id '" + filmId + "'");
          }
