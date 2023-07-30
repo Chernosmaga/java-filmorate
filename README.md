@@ -361,7 +361,7 @@ public createUser(@Valid @RequestBody User user)
 пользователей, которые являются друзьями друг друга, а `bool` означает подтверждено ли было добавление в друзья
 
 
-### [Ссылка на файл здесь](file:///D:/Java%20stuff/java-filmorate/data-base-diagram.svg)
+### [Ссылка на файл здесь](https://github.com/Chernosmaga/java-filmorate/blob/data-base-structure/data-base-diagram.svg)
 
 </details>
 
