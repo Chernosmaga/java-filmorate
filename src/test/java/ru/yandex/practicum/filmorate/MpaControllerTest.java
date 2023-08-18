@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.MpaDbService;
 
@@ -33,7 +33,7 @@ public class MpaControllerTest {
 
     @Test
     public void getMpaById_shouldThrowExceptionIfIncorrectMpaId() {
-        Assertions.assertThrows(EmptyResultDataAccessException.class,
+        Assertions.assertThrows(ObjectNotFoundException.class,
                 () -> mpaService.getMpaById(139));
     }
 
