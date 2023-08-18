@@ -1,145 +1,159 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.AfterEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserControllerTest {
-    private InMemoryUserStorage storage = new InMemoryUserStorage();
-    private UserService service = new UserService(storage);
-    private UserController controller = new UserController(storage, service);
-    private final User user = new User(1L, "lollipop@yandex.ru", "scramble", "Matthew",
-            LocalDate.of(1990, 1, 1), new HashSet<>());
-    private final User updatedUser = new User(1L, "yandex@yandex.ru", "scramble", "Matthew",
-            LocalDate.of(1990, 2, 1), new HashSet<>());
-    private final User emptyNameUser = new User(6L, "mail@yandex.ru", "user", null,
-            LocalDate.of(1990, 1, 1), new HashSet<>());
-    private final User incorrectEmailUser = new User(3L, "somebody once told me, the world is gonna roll me",
-            "awesome guy", "Andrew", LocalDate.of(1997, 8, 13), new HashSet<>());
-    private final User emptyEmailUser = new User(1L, "", "puss in boots", null,
-            LocalDate.of(1990, 1, 1), new HashSet<>());
-    private final User commonFriend = new User(19L, "friend@yandex.ru", "friend", "Alexander",
-            LocalDate.of(1996, 4, 20), new HashSet<>());
+    private final UserDbService userService;
 
-    @AfterEach
-    public void afterEach() {
-        storage.deleteUsers();
+    private final User user = new User("i_am_groot@ya.ru", "grooooot",
+                "Matthew", LocalDate.of(1997, 3, 3));
+    private final User updatedUser = new User("i_am_groot@ya.ru", "grooooot",
+                "Matthew", LocalDate.of(1996, 5, 15));
+    private final User friend = new User("batterfly@ya.ru", "dandelion",
+            "Alice", LocalDate.of(2000, 1, 30));
+    private final User friendOfBoth = new User("dragon@ya.ru", "dragonfly",
+                "Alex", LocalDate.of(2001, 3, 4));
+
+    @Test
+    public void createUser_shouldCreateUser() {
+        userService.createUser(user);
+
+        Assertions.assertFalse(userService.getUsers().isEmpty());
     }
 
     @Test
-    void createUser_shouldCreateAUser() {
-        controller.createUser(user);
-
-        Assertions.assertEquals(1, controller.getUsers().size());
+    public void createUser_shouldNotCreateUserWithId1() {
+        userService.createUser(updatedUser);
+        Assertions.assertThrows(DuplicateKeyException.class, () -> userService.createUser(updatedUser));
     }
 
     @Test
-    void getUserById_shouldReturnUserWithCorrectId() {
-        controller.createUser(user);
-        User thisUser = storage.getUserById(user.getId());
+    public void updateUser_shouldUpdateUser() {
+        User thisUser = userService.createUser(user);
+        User thisUpdatedUser = userService.updateUser(thisUser);
 
-        Assertions.assertEquals(thisUser.getId(), user.getId());
+        Assertions.assertEquals(thisUser.getEmail(), thisUpdatedUser.getEmail());
     }
 
     @Test
-    void update_shouldUpdateUserData() {
-        controller.createUser(user);
-        controller.updateUser(updatedUser);
-
-        Assertions.assertEquals("yandex@yandex.ru", updatedUser.getEmail());
-        Assertions.assertEquals(user.getId(), updatedUser.getId());
-        Assertions.assertEquals(1, controller.getUsers().size());
+    public void updateUser_shouldNotUpdateUserIfNotExists() {
+        Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(user));
     }
 
     @Test
-    void createUser_shouldCreateAUserIfNameIsEmpty() {
-        controller.createUser(emptyNameUser);
+    public void getUserById_shouldReturnUserWithId1() {
+        userService.createUser(user);
+        User thisUser = userService.getUserById(1L);
 
-        Assertions.assertEquals(6, emptyNameUser.getId());
-        Assertions.assertEquals("user", emptyNameUser.getName());
+        Assertions.assertEquals(user.getEmail(), thisUser.getEmail());
     }
 
     @Test
-    void createUser_shouldThrowExceptionIfEmailIsIncorrect() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.createUser(incorrectEmailUser));
-        Assertions.assertEquals(0, controller.getUsers().size());
+    public void getUserById_shouldNotReturnUserIfNotExists() {
+        Assertions.assertThrows(ObjectNotFoundException.class, () -> userService.getUserById(1L));
     }
 
     @Test
-    void createUser_shouldThrowExceptionIfEmailIsEmpty() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.createUser(emptyEmailUser));
-        Assertions.assertEquals(0, controller.getUsers().size());
+    public void addFriend_shouldAddFriend() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
+        userService.addFriend(thisFriend.getId(), thisUser.getId());
+
+        Assertions.assertFalse(userService.getFriendsList(thisUser.getId()).isEmpty());
+        Assertions.assertFalse(userService.getFriendsList(thisFriend.getId()).isEmpty());
     }
 
     @Test
-    void createUser_shouldNotAddUserIfLoginIsEmpty() {
-        user.setLogin("");
+    public void addFriend_shouldStayAsFollower() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
 
-        Assertions.assertThrows(ValidationException.class, () -> controller.createUser(user));
-        Assertions.assertEquals(0, controller.getUsers().size());
+        Assertions.assertFalse(userService.getFriendsList(thisUser.getId()).isEmpty());
+        Assertions.assertTrue(userService.getFriendsList(thisFriend.getId()).isEmpty());
     }
 
     @Test
-    void createUser_shouldNotAddUserIfBirthdayIsInTheFuture() {
-        user.setBirthday(LocalDate.of(2024, 6, 28));
-
-        Assertions.assertThrows(ValidationException.class, () -> controller.createUser(user));
-        Assertions.assertEquals(0, controller.getUsers().size());
+    public void addFriend_shouldThrowExceptionIfAddingYourselfIntoAFriendsList() {
+        User thisUser = userService.createUser(user);
+        Assertions.assertThrows(ObjectAlreadyExistsException.class,
+                () -> userService.addFriend(thisUser.getId(), thisUser.getId()));
     }
 
     @Test
-    void addFriend_shouldAddFriendToOtherUsersSet() {
-        controller.createUser(user);
-        controller.createUser(emptyNameUser);
-        controller.addFriend(user.getId(), emptyNameUser.getId());
+    public void deleteFriend_shouldDeleteFriend() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
+        userService.addFriend(thisFriend.getId(), thisUser.getId());
+        userService.deleteFriend(thisUser.getId(), thisFriend.getId());
+        userService.deleteFriend(thisFriend.getId(), thisUser.getId());
 
-        Assertions.assertTrue(user.getFriendsQuantity() != 0);
-        Assertions.assertTrue(emptyNameUser.getFriendsQuantity() != 0);
+        Assertions.assertTrue(userService.getFriendsList(thisUser.getId()).isEmpty());
+        Assertions.assertTrue(userService.getFriendsList(thisFriend.getId()).isEmpty());
     }
 
     @Test
-    void deleteFriend_shouldDeleteFriendFromOtherUsersSet() {
-        controller.createUser(user);
-        controller.createUser(emptyNameUser);
-        controller.addFriend(user.getId(), emptyNameUser.getId());
-        controller.removeFriend(user.getId(), emptyNameUser.getId());
+    public void deleteFriend_shouldThrowExceptionIfNotFriends() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
 
-        Assertions.assertEquals(0, user.getFriendsQuantity());
-        Assertions.assertEquals(0, emptyNameUser.getFriendsQuantity());
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.deleteFriend(thisUser.getId(), thisFriend.getId()));
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.deleteFriend(thisFriend.getId(), thisUser.getId()));
     }
 
     @Test
-    void getCommonFriends_shouldReturnListWithSizeOne() {
-        controller.createUser(user);
-        controller.createUser(emptyNameUser);
-        controller.addFriend(user.getId(), emptyNameUser.getId());
-        controller.createUser(commonFriend);
-        controller.addFriend(user.getId(), commonFriend.getId());
-        controller.addFriend(emptyNameUser.getId(), commonFriend.getId());
-        List<User> commonFriendList = controller.getCommonFriends(user.getId(), emptyNameUser.getId());
+    public void getFriendsList_shouldReturnFriendsListWithSize1() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
+        userService.addFriend(thisFriend.getId(), thisUser.getId());
 
-        Assertions.assertEquals(1, commonFriendList.size());
+        Assertions.assertEquals(1, userService.getFriendsList(thisUser.getId()).size());
+        Assertions.assertEquals(1, userService.getFriendsList(thisFriend.getId()).size());
     }
 
     @Test
-    void getFriends_shouldReturnFriendsListOfUser() {
-        controller.createUser(user);
-        controller.createUser(emptyNameUser);
-        controller.createUser(commonFriend);
-        controller.addFriend(user.getId(), emptyNameUser.getId());
-        controller.addFriend(user.getId(), commonFriend.getId());
-        List<User> listOfUsersFriends = controller.getFriends(user.getId());
+    public void getCommonFriends_shouldReturnListOfCommonFriends() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        User thisFriendOfBoth = userService.createUser(friendOfBoth);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
+        userService.addFriend(thisFriend.getId(), thisUser.getId());
+        userService.addFriend(thisUser.getId(), thisFriendOfBoth.getId());
+        userService.addFriend(thisFriend.getId(), thisFriendOfBoth.getId());
 
-        Assertions.assertEquals(2, listOfUsersFriends.size());
+        Assertions.assertTrue(userService.getCommonFriends(thisUser.getId(), thisFriend.getId())
+                .contains(thisFriendOfBoth));
     }
 
+    @Test
+    public void getCommonFriends_shouldReturnAnEmptyListsOfCommonFriends() {
+        User thisUser = userService.createUser(user);
+        User thisFriend = userService.createUser(friend);
+        userService.addFriend(thisUser.getId(), thisFriend.getId());
+        userService.addFriend(thisFriend.getId(), thisUser.getId());
+
+        Assertions.assertTrue(userService.getCommonFriends(thisUser.getId(), thisFriend.getId()).isEmpty());
+        Assertions.assertTrue(userService.getCommonFriends(thisFriend.getId(), thisUser.getId()).isEmpty());
+    }
 }
