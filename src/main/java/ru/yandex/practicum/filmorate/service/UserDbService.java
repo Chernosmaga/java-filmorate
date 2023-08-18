@@ -139,7 +139,7 @@ public class UserDbService {
         }
         if (userId.equals(friendId)) {
             throw new ObjectAlreadyExistsException(
-                    "Attempt to delete yourself from a friends list, the id is "+ userId);
+                    "Attempt to delete yourself from a friends list, the id is " + userId);
         }
         if (!friendshipDao.isFriend(userId, friendId)) {
             throw new ValidationException(
