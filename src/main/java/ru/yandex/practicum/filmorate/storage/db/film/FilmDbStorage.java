@@ -60,13 +60,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilms() {
-        log.debug("deleteFilms()");
-        jdbcTemplate.update("DELETE * FROM films");
-        log.trace("All movies were deleted from the data base");
-    }
-
-    @Override
     public Film getFilmById(Long id) {
         log.debug("getFilmById({})", id);
         Film thisFilm = jdbcTemplate.queryForObject(

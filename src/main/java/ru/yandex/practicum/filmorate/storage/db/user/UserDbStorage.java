@@ -51,14 +51,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUsers() {
-        log.debug("deleteUsers()");
-        jdbcTemplate.update("DELETE * "
-                      + "FROM users");
-        log.trace("All users were deleted from the data base");
-    }
-
-    @Override
     public User getUserById(Long id) {
         log.debug("getUserById({})", id);
         User thisUser = jdbcTemplate.queryForObject(

@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -20,6 +22,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserControllerTest {
     private final UserDbService userService;
+    private final JdbcTemplate jdbcTemplate;
 
     private final User user = new User("i_am_groot@ya.ru", "grooooot",
                 "Matthew", LocalDate.of(1997, 3, 3));
@@ -29,6 +32,12 @@ public class UserControllerTest {
             "Alice", LocalDate.of(2000, 1, 30));
     private final User friendOfBoth = new User("dragon@ya.ru", "dragonfly",
                 "Alex", LocalDate.of(2001, 3, 4));
+
+    @AfterEach
+    void afterEach() {
+        jdbcTemplate.execute("DELETE FROM users");
+        jdbcTemplate.execute("DELETE FROM films");
+    }
 
     @Test
     public void createUser_shouldCreateUser() {
@@ -58,10 +67,10 @@ public class UserControllerTest {
 
     @Test
     public void getUserById_shouldReturnUserWithId1() {
-        userService.createUser(user);
-        User thisUser = userService.getUserById(1L);
+        User newUser = userService.createUser(user);
+        User thisUser = userService.getUserById(newUser.getId());
 
-        Assertions.assertEquals(user.getEmail(), thisUser.getEmail());
+        Assertions.assertEquals(newUser.getEmail(), thisUser.getEmail());
     }
 
     @Test
