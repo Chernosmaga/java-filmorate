@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Component("FilmDbStorage")
+@Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;

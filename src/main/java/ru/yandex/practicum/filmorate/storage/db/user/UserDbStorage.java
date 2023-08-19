@@ -12,7 +12,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Slf4j
-@Component("UserDbStorage")
+@Component
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
