@@ -10,10 +10,12 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.db.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.db.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.db.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.db.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.db.mpa.MpaDao;
 import ru.yandex.practicum.filmorate.storage.db.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.db.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -25,8 +27,8 @@ import static java.lang.String.format;
 @Slf4j
 @Service
 public class FilmDbService {
-    private final FilmDbStorage filmStorage;
-    private final UserDbStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
     private final LikeDao likeDao;

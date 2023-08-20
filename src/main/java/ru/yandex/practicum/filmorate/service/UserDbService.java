@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.db.friendship.FriendshipDao;
 import ru.yandex.practicum.filmorate.storage.db.user.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.db.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,7 +21,7 @@ import static java.lang.String.format;
 @Slf4j
 @Service
 public class UserDbService {
-    private final UserDbStorage userStorage;
+    private final UserStorage userStorage;
     private final FriendshipDao friendshipDao;
 
     @Autowired
