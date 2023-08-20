@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users;
     private final Map<Long, Long> friends;
@@ -57,6 +57,7 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
+    @Override
     public void addFriend(Long userId, Long friendId) {
         if (friends.containsKey(userId)) {
             friends.put(userId, friendId);
@@ -65,6 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
+    @Override
     public void removeFriend(Long userId, Long friendId) {
         if (friends.containsKey(userId)) {
             friends.remove(userId, friendId);
@@ -73,6 +75,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
+    @Override
     public List<User> getFriends(Long userId) {
         List<User> friendsList = new ArrayList<>();
         if (friends.containsKey(userId)) {

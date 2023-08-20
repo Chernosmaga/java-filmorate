@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Component
+@Component("FilmDbStorage")
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -76,6 +76,21 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT film_id, name, description, release_date, duration, mpa_id FROM films", new FilmMapper());
         log.trace("There are movies in the data base: {}", films);
         return films;
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+
+    }
+
+    @Override
+    public void removeLike(Long filmId, Long userId) {
+
+    }
+
+    @Override
+    public int getLikesQuantity(Long filmId) {
+        return 0;
     }
 
     @Override

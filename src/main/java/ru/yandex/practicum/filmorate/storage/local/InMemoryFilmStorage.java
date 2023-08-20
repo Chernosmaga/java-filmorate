@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
-@Component
+@Component("InMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films;
     private final Map<Long, Long> likes;
@@ -58,6 +58,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new ArrayList<>(films.values());
     }
 
+    @Override
     public void addLike(Long filmId, Long userId) {
         if (likes.containsKey(filmId)) {
             likes.put(filmId, userId);
@@ -66,6 +67,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
+    @Override
     public void removeLike(Long filmId, Long userId) {
         if (likes.containsKey(filmId)) {
             likes.remove(filmId, userId);
@@ -74,6 +76,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
+    @Override
     public int getLikesQuantity(Long filmId) {
         int sum = 0;
         if (likes.containsKey(filmId)) {

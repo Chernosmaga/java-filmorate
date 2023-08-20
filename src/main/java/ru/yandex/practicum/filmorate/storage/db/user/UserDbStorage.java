@@ -12,7 +12,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Slf4j
-@Component
+@Component("UserDbStorage")
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -68,6 +68,21 @@ public class UserDbStorage implements UserStorage {
                 new UserMapper());
         log.trace("These are users in the data base: {}", users);
         return users;
+    }
+
+    @Override
+    public void addFriend(Long userId, Long friendId) {
+
+    }
+
+    @Override
+    public void removeFriend(Long userId, Long friendId) {
+
+    }
+
+    @Override
+    public List<User> getFriends(Long userId) {
+        return null;
     }
 
     @Override

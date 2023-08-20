@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -23,13 +24,25 @@ import static java.lang.String.format;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FilmDbService {
     private final FilmDbStorage filmStorage;
     private final UserDbStorage userStorage;
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
     private final LikeDao likeDao;
+
+    @Autowired
+    public FilmDbService(@Qualifier("FilmDbStorage") FilmDbStorage filmStorage,
+                         @Qualifier("UserDbStorage") UserDbStorage userStorage,
+                         GenreDao genreDao,
+                         MpaDao mpaDao,
+                         LikeDao likeDao) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.genreDao = genreDao;
+        this.mpaDao = mpaDao;
+        this.likeDao = likeDao;
+    }
 
     public Film createFilm(Film film) {
         checkIfExists(film);

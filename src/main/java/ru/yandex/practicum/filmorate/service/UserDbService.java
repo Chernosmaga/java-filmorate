@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -18,10 +19,16 @@ import static java.lang.String.format;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserDbService {
     private final UserDbStorage userStorage;
     private final FriendshipDao friendshipDao;
+
+    @Autowired
+    public UserDbService(@Qualifier("UserDbStorage") UserDbStorage userStorage,
+                         FriendshipDao friendshipDao) {
+        this.userStorage = userStorage;
+        this.friendshipDao = friendshipDao;
+    }
 
     public User createUser(User user) {
         if (user.getId() != null) {

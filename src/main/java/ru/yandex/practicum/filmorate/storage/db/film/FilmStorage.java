@@ -16,6 +16,12 @@ public interface FilmStorage {
 
     List<Film> getFilms();
 
+    void addLike(Long filmId, Long userId);
+
+    void removeLike(Long filmId, Long userId);
+
+    int getLikesQuantity(Long filmId);
+
     boolean isContains(Long id);
 
     void addGenres(Long filmId, Set<Genre> genres);
