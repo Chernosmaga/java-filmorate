@@ -225,8 +225,8 @@ public createUser(@Valid @RequestBody User user)
 
 </details>
 
-### Количество итераций:
-### Количество замечаний:
+### Количество итераций: 3
+### Количество замечаний: 2
 
 <details>
  <summary>Техническое задание 11-го спринта</summary>
