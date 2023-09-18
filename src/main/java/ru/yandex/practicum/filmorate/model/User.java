@@ -4,12 +4,11 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
-    @PositiveOrZero
     private Long id;
     @Email
     private String email;
@@ -18,17 +17,11 @@ public class User {
     private String name;
     @PastOrPresent
     private LocalDate birthday;
-    private Set<Long> friends;
 
-    public void addFriend(Long id) {
-        friends.add(id);
-    }
-
-    public void removeFriend(Long id) {
-        friends.remove(id);
-    }
-
-    public int getFriendsQuantity() {
-        return friends.size();
+    public User(String email, String login, String name, LocalDate birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
     }
 }

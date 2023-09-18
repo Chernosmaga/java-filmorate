@@ -1,128 +1,163 @@
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.FilmController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import ru.yandex.practicum.filmorate.exception.ObjectAlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.service.FilmDbService;
+import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmControllerTest {
-    private FilmStorage storage = new InMemoryFilmStorage();
-    private UserStorage userStorage = new InMemoryUserStorage();
-    private UserService userService = new UserService(userStorage);
-    private FilmService service = new FilmService(storage, userService);
-    private FilmController controller = new FilmController(storage, service);
-    private final Film film = new Film(1L, "Movie", "The most awesome movie I've ever seen",
-            LocalDate.of(2020, 2, 2), 120, new HashSet<>());
-    private final Film updatedFilm = new Film(1L, "Movie",
-            "I cried at the end, it was very thoughtful",
-            LocalDate.of(2020, 2, 2), 120, new HashSet<>());
-    private final Film noNamedFilm = new Film(1L, "", "The most awesome movie I've ever seen",
-            LocalDate.of(2020, 2, 2), 120, new HashSet<>());
-    private final Film longDescpriptionFilm = new Film(1L, "Movie",
-            "This is the most amazing and terrifying movie in my life. I love scary movies," +
-            "but I've never seen such precise details of serial killers doing their job." +
-            "You should definitely see this one. Actually, this movie was based on a true story. Creepy...",
-            LocalDate.of(2020, 2, 2), 120, new HashSet<>());
-    private final Film negativeDurationFilm = new Film(1L, "Movie",
-            "The most awesome movie I've ever seen",
-            LocalDate.of(2020, 2, 2), -15, new HashSet<>());
-    private final User user = new User(2L, "lollipop@ya.ru", "lollipop", "Martin",
-            LocalDate.of(1997, 3, 5), new HashSet<>());
+    private final FilmDbService filmService;
+    private final UserDbService userService;
+    private final JdbcTemplate jdbcTemplate;
+    private final User user = new User("user@ya.ru", "flying_dragon", "Andrew",
+            LocalDate.of(1996, 12, 3));
+    private final Film film = new Film("Ron's Gone Wrong", "The cartoon about a funny robot",
+            LocalDate.of(2021, 10, 22), 107);
+    private final Film updatedFilm = new Film("Ron's Gone Wrong",
+            "The cartoon about a friendship between robot and a human",
+            LocalDate.of(2021, 10, 22), 107);
+    private final Film oneMoreFilm = new Film("Red Lights", "The misctic movie about prycology",
+            LocalDate.of(2012, 1, 20), 113);
+    private final Film unexistingFilm = new Film("Sowl", "jbdbfglkawng",
+            LocalDate.of(2023, 2, 2), 100);
+    private final Film popularFilm = new Film("Titanic",
+            "The movie about love", LocalDate.of(1997, 12, 19), 220);
 
     @AfterEach
-    public void afterEach() {
-        storage.deleteFilms();
+    void afterEach() {
+        jdbcTemplate.execute("DELETE FROM users");
+        jdbcTemplate.execute("DELETE FROM films");
     }
 
     @Test
-    void createFilm_shouldAddAMovie() {
-        controller.createFilm(film);
+    public void createFilm_shouldCreateFilm() {
+        film.setMpa(new Mpa(1));
+        film.setGenres(Set.of(new Genre(2)));
+        filmService.createFilm(film);
 
-        Assertions.assertEquals(1, controller.getFilms().size());
+        Assertions.assertFalse(filmService.getFilms().isEmpty());
     }
 
     @Test
-    void updateFilm_shouldUpdateMovieData() {
-        controller.createFilm(film);
-        controller.updateFilm(updatedFilm);
+    public void createFilm_shouldNotCreateFilmIfDescriptionTooLong() {
+        film.setMpa(new Mpa(1));
+        film.setGenres(Set.of(new Genre(2)));
+        film.setDescription("This is the cartoon about a funny robot who always get into trouble." +
+                "Other people though he is defective, but there was a guy who was happy to get him on his birthday." +
+                "This cartoon show the future behaviour of our generation who grew up next to the phone and computer.");
 
-        Assertions.assertEquals("I cried at the end, it was very thoughtful", updatedFilm.getDescription());
-        Assertions.assertEquals(1, controller.getFilms().size());
+        Assertions.assertThrows(ValidationException.class, () -> filmService.createFilm(film));
     }
 
     @Test
-    void getFilmById_shouldReturnAMovieWithIdOne() {
-        controller.createFilm(film);
-        Film thisFilm = controller.getFilmById(film.getId());
+    public void updateFilm_shouldUpdateFilm() {
+        film.setMpa(new Mpa(1));
+        film.setGenres(Set.of(new Genre(1)));
+        Film newFilm = filmService.createFilm(film);
+        newFilm.setGenres(Set.of(new Genre(3), new Genre(2)));
+        Film filmUpdated = filmService.updateFilm(newFilm);
 
-        Assertions.assertEquals(1, thisFilm.getId());
+        Assertions.assertEquals(filmService.getFilmById(newFilm.getId()).getName(),
+                filmService.getFilmById(filmUpdated.getId()).getName());
     }
 
     @Test
-    void createFilm_shouldNotAddAMovieWithAnEmptyName() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.createFilm(noNamedFilm));
-        Assertions.assertEquals(0, controller.getFilms().size());
+    public void getFilmById_shouldReturnFilm() {
+        film.setMpa(new Mpa(1));
+        film.setGenres(Set.of(new Genre(1)));
+        Film newFilm = filmService.createFilm(film);
+
+        Assertions.assertEquals(newFilm, filmService.getFilmById(newFilm.getId()));
     }
 
     @Test
-    void createFilm_shouldNotAddAMovieWithDescriptionMoreThan200() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.createFilm(longDescpriptionFilm));
-        Assertions.assertEquals(0, controller.getFilms().size());
+    public void getFilmById_shouldNotReturnFilmIfIdIsIncorrect() {
+        Assertions.assertThrows(ObjectNotFoundException.class, () -> filmService.getFilmById(145L));
     }
 
     @Test
-    void createFilm_shouldNotAddAMovieWithDateReleaseLessThan1895() {
-        film.setReleaseDate(LocalDate.of(1891, 2, 2));
+    public void getFilms_shouldReturnListOfFilms() {
+        film.setMpa(new Mpa(1));
+        film.setGenres(Set.of(new Genre(1)));
+        filmService.createFilm(film);
+        popularFilm.setMpa(new Mpa(1));
+        popularFilm.setGenres(Set.of(new Genre(1), new Genre(2)));
+        filmService.createFilm(popularFilm);
 
-        Assertions.assertThrows(ValidationException.class, () -> controller.createFilm(film));
-        Assertions.assertEquals(0, controller.getFilms().size());
+        Assertions.assertEquals(2, filmService.getFilms().size());
     }
 
     @Test
-    void createFilm_shouldNotAddAMovieIfDurationIsLessThan0() {
-        Assertions.assertThrows(ValidationException.class, () -> controller.createFilm(negativeDurationFilm));
-        Assertions.assertEquals(0, controller.getFilms().size());
+    public void getFilms_shouldReturnAnEmptyListOfFilms() {
+        Assertions.assertTrue(filmService.getFilms().isEmpty());
     }
 
     @Test
-    void likeAMovie_shouldAddALikeToAMovie() {
-        userStorage.createUser(user);
-        controller.createFilm(film);
-        controller.likeAMovie(film.getId(), user.getId());
+    public void getPopularMovies_shouldReturnListOfPopularMovies() {
+        User newUser = userService.createUser(user);
+        updatedFilm.setMpa(new Mpa(3));
+        updatedFilm.setGenres(Set.of(new Genre(1), new Genre(2)));
+        Film newFilm = filmService.createFilm(updatedFilm);
+        popularFilm.setMpa(new Mpa(4));
+        popularFilm.setGenres(Set.of(new Genre(2), new Genre(3)));
+        Film likedMovie = filmService.createFilm(popularFilm);
+        filmService.like(likedMovie.getId(), newUser.getId());
+        Collection<Film> films = filmService.getPopularMovies(1);
 
-        Assertions.assertTrue(film.getLikesQuantity() != 0);
+        Assertions.assertTrue(films.contains(likedMovie));
     }
 
     @Test
-    void removeLike_shouldRemoveLikeFromAMovie() {
-        userStorage.createUser(user);
-        controller.createFilm(film);
-        controller.likeAMovie(film.getId(), user.getId());
-        controller.removeLike(film.getId(), user.getId());
+    public void like_shouldLikeAMovie() {
+        User newUser = userService.createUser(user);
+        unexistingFilm.setMpa(new Mpa(3));
+        unexistingFilm.setGenres(Set.of(new Genre(1), new Genre(2)));
+        Film newFilm = filmService.createFilm(unexistingFilm);
+        filmService.like(newFilm.getId(), newUser.getId());
 
-        Assertions.assertEquals(0, film.getLikesQuantity());
+        Assertions.assertEquals(1, filmService.getPopularMovies(1).size());
     }
 
     @Test
-    void getPopularMovies_shouldReturnListOfPopularMovies() {
-        userStorage.createUser(user);
-        controller.createFilm(film);
-        controller.likeAMovie(film.getId(), user.getId());
-        List<Film> popularMoviesList = service.getPopularMovies(1);
+    public void like_shouldNotLikeAMoviesIfItsAlreadyLikedByUser() {
+        User thisUser = userService.createUser(user);
+        oneMoreFilm.setMpa(new Mpa(3));
+        oneMoreFilm.setGenres(Set.of(new Genre(1), new Genre(2)));
+        Film thisOneMoreFilm = filmService.createFilm(oneMoreFilm);
+        filmService.like(thisOneMoreFilm.getId(), thisUser.getId());
 
-        Assertions.assertEquals(1, popularMoviesList.size());
+        Assertions.assertThrows(ObjectAlreadyExistsException.class,
+                () -> filmService.like(thisOneMoreFilm.getId(), thisUser.getId()));
+    }
+
+    @Test
+    public void dislike_shouldNotDislikeAMovieIfItWasNotLiked() {
+        userService.createUser(user);
+        film.setMpa(new Mpa(3));
+        film.setGenres(Set.of(new Genre(1), new Genre(2)));
+        filmService.createFilm(film);
+
+        Assertions.assertThrows(ObjectNotFoundException.class,
+                () -> filmService.dislike(film.getId(), user.getId()));
     }
 }
