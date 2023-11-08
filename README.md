@@ -1,4 +1,15 @@
-# Приложение для оценки просмотренных фильмов и рекомендаций
+# Filmorate: приложение для оценки просмотренных фильмов и рекомендаций
+
+## Идея проекта
+Приложение для оценки просмотренных фильмов, с возможностью регистрации новых пользователей, добавления в друзья и с фичей ставить лайки понравившимся фильмам. Дальше реализованы возможности: поиска по ключевым словам, рекомендации для пользователей, оставлять отзывы, общие фильмы друзей и заменены лайки на оценки по десятибальной шкале (см. [групповой проект](https://github.com/Elite-tea/java-filmorate).
+
+## Стек проекта
+Это первая самостоятельная работа с такими технологиями как: SQL и JDBC. Помимо этого в проекте присутствует Lombok и H2, фреймворк - Spring.
+
+## База данных проекта
+![](https://github.com/Chernosmaga/java-filmorate/blob/main/src/main/resources/filmorate_db.png)
+
+## Технические задания проекта:
 <details>
  <summary>Техническое задание 9-го спринта</summary>
 
@@ -137,9 +148,6 @@ public createUser(@Valid @RequestBody User user)
 
 </details>
 
-### Количество итераций: 3
-### Количество замечаний: 6
-
 <details>
 <summary>Техническое задание 10-го спринта</summary>
 
@@ -229,9 +237,6 @@ public createUser(@Valid @RequestBody User user)
 
 
 </details>
-
-### Количество итераций: 2
-### Количество замечаний: 2
 
 <details>
  <summary>Промежуточное задание месяца SQL</summary>
@@ -373,11 +378,6 @@ public createUser(@Valid @RequestBody User user)
 Документы по разметке, которая поддерживается GitHub, лежат [здесь](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#images).
 
 </details>
-
-### [Ссылка на файл БД здесь](https://github.com/Chernosmaga/java-filmorate/blob/data-base-structure/data-base-diagram.svg)
-
-### Количество итераций: 3
-### Количество замечаний: 3
 
 <details>
  <summary>Техническое задание 11-го спринта</summary>
@@ -534,6 +534,3 @@ class FilmoRateApplicationTests {
 Выбрать что-нибудь для просмотра за ужином больше не составит труда. Вы снова на высоте. Хеппи-энд и титры!
 
 </details>
-
-### Количество итераций: 3
-### Количество замечаний: 2
